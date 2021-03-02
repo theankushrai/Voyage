@@ -1,10 +1,14 @@
 package com.example.wander
 
+import android.annotation.SuppressLint
+import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.google.android.gms.dynamic.IObjectWrapper
 
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -13,9 +17,11 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 import java.util.*
+import java.util.jar.Manifest
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
+    private val REQUEST_LOCATION_PERMISSION = 1
     private lateinit var map: GoogleMap
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,7 +59,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 .position(homeLatLong,overlaySize)
         map.addGroundOverlay(androidOverlay)
 
-
+//        enabling location
+        enableMyLocation()
         //adding a marker at home
         map.addMarker(MarkerOptions().position(homeLatLong))
         //adding long click methord
@@ -116,6 +123,35 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                             .title(poi.name)
             )
             poiMarker.showInfoWindow()
+        }
+    }
+    private fun isPermissionGranted() : Boolean {
+        return ContextCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+    }
+
+    //enable location
+    @SuppressLint("MissingPermission")
+    private fun enableMyLocation(){
+        if (isPermissionGranted()) {
+            map.isMyLocationEnabled = true
+        }
+        else{
+            ActivityCompat.requestPermissions(this,
+            arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION),REQUEST_LOCATION_PERMISSION)
+        }
+
+    }
+
+    //when request permission is given
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        // Check if location permissions are granted and if so enable the
+        // location data layer.
+        if (requestCode == REQUEST_LOCATION_PERMISSION) {
+            if (grantResults.isNotEmpty() && (grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                enableMyLocation()
+            }
         }
     }
 }
