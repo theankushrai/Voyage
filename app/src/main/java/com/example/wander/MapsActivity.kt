@@ -11,6 +11,7 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import java.util.*
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -46,6 +47,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         //adding a marker at home
         map.addMarker(MarkerOptions().position(homeLatLong))
+        //adding long click methord
+        setMapLongClick(map)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -73,5 +76,22 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
         else -> super.onOptionsItemSelected(item)
 
+    }
+    // long click function
+    private fun setMapLongClick(map:GoogleMap){
+        map.setOnMapLongClickListener {
+           //creating a info windows when clicked on a marker
+            val snippet = String.format(
+                    Locale.getDefault(),
+                    "Lat: %1$.5f, Long: %2$.5f",
+                    it.latitude,
+                    it.longitude
+            )
+            map.addMarker(MarkerOptions()
+                    .position(it)
+                    .title(getString(R.string.dropped_pin))
+                    .snippet(snippet)
+            )
+        }
     }
 }
